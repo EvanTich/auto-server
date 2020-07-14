@@ -1,0 +1,16 @@
+{
+  "name": "auto-server",
+  "version": "1.0.0",
+  "description": "Allows a user to start a minecraft server using a password-protected web interface.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Evan Tichenor",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.1",
+    "express-basic-auth": "^1.2.0",
+    "socket.io": "^2.3.0"
+  }
+}

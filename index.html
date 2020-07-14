@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Server Controls</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="/socket.io/socket.io.js"></script>
+  </head>
+<body>
+  <div style="float:left;width:20vw;">
+    <h2>Server Status: <span id="status" style="color:magenta">?</span></h2>
+    <h3>Ready to join: <span id="ready" style="color:magenta">?</span></h3>
+  
+    <h2>Server Control</h2>
+    <span id="info"></span>
+    <br><br>
+    <button type="button" id="start">Start Server</button>
+    <button type="button" id="stop">Stop Server</button>
+    <br>
+    <button type="button" id="clearlog">Clear Log</button>
+  </div>
+
+  <div style="border-right:3px solid black;top:0;bottom:0;left:20vw;position:absolute;"></div>
+  
+  <div id="log" style="float:right;overflow:auto;max-width:79vw;max-height:99vh;"></div>
+</body>
+<script>
+    const socket = io();
+    
+    const log = document.getElementById('log');
+
+    function buttonEmit(id, emit) {
+        document.getElementById(id).addEventListener('click', () => {
+            socket.emit(emit);
+        });
+    }
+
+    // setup buttons
+    buttonEmit('start', 'start');
+    buttonEmit('stop', 'stop');
+    document.getElementById('clearlog').addEventListener('click', () => {
+        log.innerHTML = '';
+    });
+
+    function logMsg(msg) {
+        let node = document.createElement('div');
+        node.innerHTML = msg;
+        log.appendChild(node);
+    }
+
+    const ready = document.getElementById('ready');
+    socket.on('ready', d => {
+        if(d) {
+            ready.innerHTML = 'YES';
+            ready.style = 'color:green';
+        } else {
+            ready.innerHTML = 'NO';
+            ready.style = 'color:red';
+        }
+    });
+
+    const stat = document.getElementById('status');
+    socket.on('server', d => {
+        if(d) {
+            stat.innerHTML = 'ON';
+            stat.style = 'color:green';
+        } else {
+            stat.innerHTML = 'OFF';
+            stat.style = 'color:red';
+        }
+    });
+
+    socket.on('log', str => {
+        logMsg(str);
+    });
+
+    const info = document.getElementById('info');
+    socket.on('info', str => {
+        info.innerHTML = str;
+    });
+
+    // init the server logs if there is any
+    fetch('/logs').then(async (lines) => {
+        lines = await lines.text();
+        let index;
+        while((index = lines.indexOf('\n')) != -1) {
+            let str = lines.substring(0, index + 1);
+            lines = lines.substring(index + 1);
+
+            logMsg(str);
+        }
+    });
+</script>
+</html>
